@@ -2,7 +2,11 @@ const fetch = require("node-fetch");
 const round = require("@qc/date-round");
 
 async function test() {
+  console.log(await main("Kungsbacka"));
+  console.log(await main("Kärna"));
   console.log(await main("Mölndal"));
+  console.log(await main("Bosgården mölndal"));
+  console.log(await main("Billdal"));
 }
 
 test();
@@ -20,8 +24,6 @@ async function main(place) {
     if (posFetch.ok) {
       posJson = await posFetch.json();
     }
-
-    //console.log(parseFloat(posJson[0].lat).toFixed(4));
 
     let response = await fetch(
       "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/" +
@@ -45,7 +47,6 @@ async function main(place) {
             const possibleParam = element.parameters[index];
             if (possibleParam.name == "pmin") param = index;
           }
-          //console.log(element.parameters[param].values[0] > 0);
 
           resolve(element.parameters[param].values[0] > 0);
         }

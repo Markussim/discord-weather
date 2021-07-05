@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@qc/date-round": "^0.0.0",
+    "node-fetch": "^2.6.1"
+  }
+}

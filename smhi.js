@@ -1,53 +1,59 @@
 const fetch = require("node-fetch");
 const round = require("@qc/date-round");
 
-main("Kungsbacka");
+async function test() {
+  console.log(await main("Mölndal"));
+}
+
+test();
 
 async function main(place) {
-  let posFetch = await fetch(
-    "https://nominatim.openstreetmap.org/search?q=135+" +
-      encodeURIComponent(place) +
-      "&format=json&polygon=1&addressdetails=1"
-  );
+  return new Promise(async (resolve, reject) => {
+    let posFetch = await fetch(
+      "https://nominatim.openstreetmap.org/search?q=135+" +
+        encodeURIComponent(place + " sweden") +
+        "&format=json&polygon=1&addressdetails=1"
+    );
 
-  let posJson;
+    let posJson;
 
-  if (posFetch.ok) {
-    posJson = await posFetch.json();
-  }
+    if (posFetch.ok) {
+      posJson = await posFetch.json();
+    }
 
-  //console.log(parseFloat(posJson[0].lat).toFixed(4));
+    //console.log(parseFloat(posJson[0].lat).toFixed(4));
 
-  let response = await fetch(
-    "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/" +
-      parseFloat(posJson[0].lon).toFixed(4) +
-      "/lat/" +
-      parseFloat(posJson[0].lat).toFixed(4) +
-      "/data.json"
-  );
+    let response = await fetch(
+      "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/" +
+        parseFloat(posJson[0].lon).toFixed(4) +
+        "/lat/" +
+        parseFloat(posJson[0].lat).toFixed(4) +
+        "/data.json"
+    );
 
-  if (response.ok) {
-    let json = await response.json();
+    if (response.ok) {
+      let json = await response.json();
 
-    json.timeSeries.forEach((element) => {
-      let date = new Date();
-      date = roundMinutes(date);
-      date.setHours(date.getHours() + 1);
+      json.timeSeries.forEach((element) => {
+        let date = new Date();
+        date = roundMinutes(date);
+        date.setHours(date.getHours() + 1);
 
-      if (new Date(element.validTime) - date == 0) {
-        let param;
-        for (let index = 0; index < element.parameters.length; index++) {
-          const possibleParam = element.parameters[index];
-          if (possibleParam.name == "pmin") param = index;
+        if (new Date(element.validTime) - date == 0) {
+          let param;
+          for (let index = 0; index < element.parameters.length; index++) {
+            const possibleParam = element.parameters[index];
+            if (possibleParam.name == "pmin") param = index;
+          }
+          //console.log(element.parameters[param].values[0] > 0);
+
+          resolve(element.parameters[param].values[0] > 0);
         }
-        console.log(element.parameters[param].values[0] > 0);
-
-        return element.parameters[param].values[0] > 0;
-      }
-    });
-  } else {
-    console.log("HTTP-Error: " + response.status);
-  }
+      });
+    } else {
+      console.log("HTTP-Error: " + response.status);
+    }
+  });
 }
 
 function roundMinutes(date) {

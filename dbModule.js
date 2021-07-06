@@ -85,8 +85,8 @@ exports.findUserWithID = async (Model, toFind) => {
   return await Model.findOne({ id: toFind });
 };
 
-exports.updateViews = async (Model, id) => {
-  await Model.update({ _id: ObjectID(id) }, { $inc: { views: 1 } });
+exports.updateLoc = async (Model, id, loc) => {
+  await Model.updateOne({ id: id }, { $set: { loc: loc } });
 };
 
 //takes input with type Model. Saves that model in Database. Cant be used before cnctDB or cnctDBAuth.

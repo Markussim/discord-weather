@@ -5,6 +5,9 @@ const smhi = require("./smhi.js");
 const fs = require("fs");
 const dBModule = require("./dbModule.js");
 const User = require("./user");
+const Redis = require("redis");
+
+const redisClient = Redis.createClient();
 
 connectToMongo("discord-weather");
 
@@ -20,31 +23,47 @@ client.on("ready", async () => {
 
 client.on("message", async (msg) => {
   if (msg.content.startsWith("try ")) {
-    smhi
-      .willItRain(msg.toString().substring(4))
-      .then((data) => {
-        let tmp = data;
+    redisClient.get(msg.toString().substring(4), async (error, rain) => {
+      if (error) console.log(error);
 
-        if (tmp) {
-          msg.reply("It will rain in the next hour there");
-        } else {
-          msg.reply("It won't rain in the next hour there");
-        }
-      })
-      .catch(() => {
-        msg.reply("Unknown error");
-      });
+      if (rain != null) {
+        console.log("Hit");
+
+        replyTry(msg, rain);
+      } else {
+        console.log("Miss");
+
+        smhi
+          .willItRain(msg.toString().substring(4))
+          .then((data) => {
+            redisClient.setex(
+              msg.toString().substring(4),
+              1800,
+              data.toString()
+            );
+            replyTry(msg, data);
+          })
+          .catch(() => {
+            msg.reply("Unknown error");
+          });
+      }
+    });
   }
 
   if (msg.content.startsWith("regloc ")) {
-    console.log(await dBModule.findUserWithID(User, msg.author.id));
     if (!(await dBModule.findUserWithID(User, msg.author.id))) {
       let user = new User({ id: msg.author.id, loc: msg.content.substring(7) });
       dBModule.saveToDB(user);
-      console.log(user);
+    } else {
+      dBModule.updateLoc(User, msg.author.id, msg.content.substring(7));
     }
-  }
 
+    msg.reply(
+      "Registered your loc as " +
+        msg.content.substring(7) +
+        '. (To disable, register your location as "none")'
+    );
+  }
 });
 
 const runEveryFullHours = (callbackFn) => {
@@ -65,28 +84,39 @@ function connectToMongo(dbName) {
 }
 
 async function sendMessages() {
-  const channel = client.channels.cache.get("707597727516590090");
+  const channel = client.channels.cache.get(process.env.CHANNEL);
   let users = await dBModule.findInDB(User);
   users.forEach(async (element) => {
-    let rain = await smhi.willItRain(element.loc);
+    if (element.loc != "none") {
+      let rain = await smhi.willItRain(element.loc);
 
-    if (rain && !rainedUsers.includes(element.id)) {
-      rainedUsers.push(element.id);
-      channel.send(
-        "<@" + element.id + ">, it will rain in the next hour in your city"
-      );
-    } else if (rainedUsers.includes(element.id)) {
-      console.log("Already rained");
+      if (rain && !rainedUsers.includes(element.id)) {
+        rainedUsers.push(element.id);
+        channel.send(
+          "<@" + element.id + ">, it will rain in the next hour in your city"
+        );
+      } else if (rainedUsers.includes(element.id)) {
+        console.log("Already rained");
 
-      if (!rain) {
-        let index = rainedUsers.indexOf(element.id);
-        rainedUsers.splice(index, 1);
-        console.log("Removed");
+        if (!rain) {
+          let index = rainedUsers.indexOf(element.id);
+          rainedUsers.splice(index, 1);
+          console.log("Removed");
+        }
       }
     }
   });
 
   console.log("Sent messages at " + new Date());
+}
+
+function replyTry(msg, rain) {
+  var isTrueSet = rain === "true";
+  if (isTrueSet) {
+    msg.reply("It will rain in the next hour there");
+  } else {
+    msg.reply("It won't rain in the next hour there");
+  }
 }
 
 client.login(process.env.TOKEN);

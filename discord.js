@@ -45,9 +45,6 @@ client.on("message", async (msg) => {
     }
   }
 
-  if (msg.content.startsWith("pucko")) {
-    sendMessages();
-  }
 });
 
 const runEveryFullHours = (callbackFn) => {

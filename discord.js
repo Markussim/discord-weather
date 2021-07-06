@@ -8,6 +8,8 @@ const User = require("./user");
 
 connectToMongo("discord-weather");
 
+let rainedUsers = [];
+
 client.on("ready", async () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
@@ -18,16 +20,12 @@ client.on("ready", async () => {
 
 client.on("message", async (msg) => {
   if (msg.content.startsWith("try ")) {
-    console.log("Got try message");
     smhi
       .willItRain(msg.toString().substring(4))
       .then((data) => {
         let tmp = data;
 
-        console.log("Got answer");
-
         if (tmp) {
-          console.log("Sending message");
           msg.reply("It will rain in the next hour there");
         } else {
           msg.reply("It won't rain in the next hour there");
@@ -45,6 +43,10 @@ client.on("message", async (msg) => {
       dBModule.saveToDB(user);
       console.log(user);
     }
+  }
+
+  if (msg.content.startsWith("pucko")) {
+    sendMessages();
   }
 });
 
@@ -70,13 +72,24 @@ async function sendMessages() {
   let users = await dBModule.findInDB(User);
   users.forEach(async (element) => {
     let rain = await smhi.willItRain(element.loc);
-    console.log(rain);
-    if (rain) {
+
+    if (rain && !rainedUsers.includes(element.id)) {
+      rainedUsers.push(element.id);
       channel.send(
         "<@" + element.id + ">, it will rain in the next hour in your city"
       );
+    } else if (rainedUsers.includes(element.id)) {
+      console.log("Already rained");
+
+      if (!rain) {
+        let index = rainedUsers.indexOf(element.id);
+        rainedUsers.splice(index, 1);
+        console.log("Removed");
+      }
     }
   });
+
+  console.log("Sent messages at " + new Date());
 }
 
 client.login(process.env.TOKEN);

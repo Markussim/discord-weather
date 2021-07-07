@@ -14,51 +14,9 @@ exports.cnctDB = (collectionname) => {
   });
 };
 
-//Finds "toFind" in Database on the Model provided
-exports.findInDBOne = async (Model, toFind) => {
-  return await Model.findOne({ name: toFind });
-};
-
-//Finds "toFind" in Database on the Model provided
-exports.findRoomInDB = async (Model, toFind) => {
-  return await Model.findOne({ roomName: toFind });
-};
-
-exports.addMessageToRoom = async (Model, roomName, Message) => {
-  await Model.updateOne(
-    { roomName: roomName },
-    { $push: { messages: Message } }
-  );
-};
-
-exports.findInDBOneRoom = async (Model, toFind) => {
-  return await Model.findOne({ roomName: toFind });
-};
 
 exports.findInDB = async (Model) => {
   return await Model.find({});
-};
-
-exports.searchInDB = async (Model, limit, search) => {
-  const regex = new RegExp(escapeRegex(search), "gi");
-
-  let tmp;
-
-  try {
-    tmp = await Model.find({
-      $and: [{ $or: [{ _id: ObjectID(search) }] }],
-    })
-      .sort({ views: -1 })
-      .limit(limit);
-  } catch (error) {
-    tmp = await Model.find({
-      $and: [{ $or: [{ name: regex }, { desc: regex }] }],
-    })
-      .sort({ views: -1 })
-      .limit(limit);
-  }
-
-  return tmp;
 };
 
 exports.findUserWithID = async (Model, toFind) => {
@@ -73,7 +31,3 @@ exports.updateLoc = async (Model, id, loc) => {
 exports.saveToDB = (input) => {
   input.save(() => {});
 };
-
-function escapeRegex(text) {
-  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-}

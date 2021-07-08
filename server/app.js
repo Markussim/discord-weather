@@ -14,7 +14,7 @@ const database = require("./database");
 //Local Variables
 const guildId = "554977304665784325";
 const client = new DiscordJS.Client({
-  partials: ["MESSAGE", "CHANNEL", "REACTION"],
+  partials: ["MESSAGE"],
 });
 const mongoURL = process.env.MONGOURL || "mongodb://localhost:27017/";
 

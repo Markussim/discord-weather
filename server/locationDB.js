@@ -15,4 +15,3 @@ exports.findUserWithID = async (toFind) => {
 exports.updateLoc = async (id, loc) => {
   await User.updateOne({ id: id }, { $set: { loc: loc } });
 };
-

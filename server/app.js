@@ -19,7 +19,7 @@ const client = new DiscordJS.Client({
 const mongoURL = process.env.MONGOURL || "mongodb://localhost:27017/";
 
 //Connects to MongoDB
-database.cnctDB("discord-weather")
+database.cnctDB("discord-weather");
 
 //When DiscordBot started, init of WOKCommands
 client.on("ready", () => {
@@ -28,7 +28,7 @@ client.on("ready", () => {
     commandsDir: "commands",
     testServers: [guildId],
     showWarns: false,
-  })
+  });
 });
 
 //Login with Discord Bot Token

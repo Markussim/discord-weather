@@ -7,7 +7,6 @@ Create a file named `.env` and copy the information below:
 ```
 CHANNEL=INSERT_YOUR_TEXT_CHANNEL_ID_HERE
 TOKEN=INSERT_YOUR_DISCORD_TOKEN_HERE
-MONGOURL=INSERT_MONGO_URL_HERE
 ```
 
 You also need a redis server running on the default port 6379.

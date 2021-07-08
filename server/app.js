@@ -10,6 +10,7 @@ const WOKCommands = require("wokcommands");
 
 //Local Dependencies import
 const database = require("./database");
+const { runEveryFullHours } = require("./sendMessages");
 
 //Local Variables
 const guildId = "554977304665784325";
@@ -25,6 +26,7 @@ client.on("ready", () => {
     testServers: [guildId],
     showWarns: false,
   });
+  runEveryFullHours(client);
 });
 
 //Connects to MongoDB

@@ -1,17 +1,35 @@
-const DiscordJS = require('discord.js')
-const WOKCommands = require('wokcommands')
-require('dotenv').config()
+//init of dotenv
+require("dotenv").config();
 
-const guildId = '554977304665784325'
-const client = new DiscordJS.Client()
+//init of better-logging
+require("better-logging")(console);
+
+//Dependencies import
+const DiscordJS = require("discord.js");
+const WOKCommands = require("wokcommands");
+
+//Local Dependencies import
+const database = require("./database");
+
+//Local Variables
+const guildId = "554977304665784325";
+const client = new DiscordJS.Client({
+  partials: ["MESSAGE", "CHANNEL", "REACTION"],
+});
 const mongoURL = process.env.MONGOURL || "mongodb://localhost:27017/";
 
-client.on('ready', () => {
-  new WOKCommands(client, {
-    commandsDir: 'commands',
-    testServers: [guildId],
-    showWarns: true,
-  }).setMongoPath(mongoURL)
-})
+//Connects to MongoDB
+database.cnctDB("discord-weather")
 
-client.login(process.env.TOKEN)
+//When DiscordBot started, init of WOKCommands
+client.on("ready", () => {
+  console.info(`Logged in as ${client.user.tag}!`);
+  new WOKCommands(client, {
+    commandsDir: "commands",
+    testServers: [guildId],
+    showWarns: false,
+  })
+});
+
+//Login with Discord Bot Token
+client.login(process.env.TOKEN);

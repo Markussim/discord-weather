@@ -9,7 +9,7 @@ const User = require("../Models/User");
 module.exports = {
   slash: "both",
   testOnly: true,
-  description: "Register your location for use with discord-weather",
+  description: "Sets your location for use with discord-weather",
   minArgs: 1,
   expectedArgs: "<location>",
   callback: async ({ interaction, args }) => {
@@ -26,7 +26,7 @@ module.exports = {
       let user = new User({ id: userID, loc: args[0] }); //Creates a User Object
       await database.saveToDB(user); //Saves user object to MongoDB
       embed.addField("Location", args[0]); //adds location field to embed
-      embed.setTitle("Registered your location"); //Sets the desc for the Embed
+      embed.setTitle("Your location is set!"); //Sets the desc for the Embed
     } else {
       await locationDB.updateLoc(userID, args[0]); //Updates location for old user
       embed.setTitle("Updated your location"); //sets desc for the embed

@@ -21,10 +21,10 @@ module.exports = {
 
     if (!exisitingUser) {
       embed.setTitle("You don't have any location set currently!"); //Sets the title for the Embed
-      embed.setDescription(`You can set a location with the command "/registerLocation your_location"`)
+      embed.setDescription(`You can set a location with the command "/setLocation your_location"`)
     } else {
         embed.setTitle(`Your location is set to "${exisitingUser.loc}"`); //Sets the title for the Embed
-        embed.setDescription(`You can change your location with the command "/registerLocation your_location"`)
+        embed.setDescription(`You can change your location with the command "/setLocation your_location"`)
       }
 
     return embed;

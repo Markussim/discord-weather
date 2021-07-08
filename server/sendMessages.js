@@ -1,7 +1,7 @@
 //Dependencies Import
 const { MessageEmbed } = require("discord.js");
 const { findInDB } = require("./locationDB");
-const { willItRain } = require("./checkWeather");
+const { checkWeather } = require("./checkWeather");
 let client;
 let rainedUsers = [];
 exports.runEveryFullHours = (clientIN) => {
@@ -23,7 +23,7 @@ exports.sendMessages = async () => {
   let users = await findInDB();
   users.forEach(async (element) => {
     if (element.loc != "none") {
-      let rain = await willItRain(element.loc);
+      let rain = await checkWeather(element.loc).rain;
 
       if (rain && !rainedUsers.includes(element.id)) {
         rainedUsers.push(element.id);

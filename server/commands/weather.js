@@ -5,7 +5,8 @@ const { MessageEmbed } = require("discord.js");
 const locationDB = require("../locationDB.js");
 const database = require("../database.js");
 const User = require("../Models/User");
-const { willItRain } = require("../checkWeather");
+const { checkWeather } = require("../checkWeather");
+const { resolveConfig } = require("better-logging/dist/lib/config");
 
 module.exports = {
   slash: "both",
@@ -25,9 +26,25 @@ module.exports = {
     let exisitingUser = await locationDB.findUserWithID(userID);
     if (exisitingUser != null || args[0] != undefined) {
       const location = args[0] || exisitingUser.loc;
-
-      embed.setTitle(await willItRain(location) ? `It will rain in the next hour at "${location}"` : `It will not rain in the next hour at "${location}"`);
-      embed.setDescription(`Data from SMHI`)
+      await new Promise((resolve, reject) => {
+        checkWeather(location)
+          .then((weather) => {
+            embed.setTitle(
+              weather.rain
+                ? `It will rain in the next hour at "${location}"`
+                : `It will not rain in the next hour at "${location}"`
+            );
+            embed.setDescription(`Data from SMHI`);
+            embed.addField("Temperature", `${weather.temp}°C`);
+            resolve();
+          })
+          .catch(() => {
+            embed
+              .setTitle("Unkown error!")
+              .setDescription("Please try again with a valid city!");
+              resolve();
+          });
+      });
     } else {
       embed.setTitle("You don't have any location set currently!"); //Sets the title for the Embed
       embed.setDescription(
